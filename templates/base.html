@@ -1,0 +1,62 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{% block title %}SVCE ACM Chapter Blog{% endblock %}</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+</head>
+<body>
+    <header class="header">
+        <div class="header-container">
+            <div class="header-logos">
+                <img src="{{ url_for('static', filename='acm-logo.png') }}" alt="ACM Logo" class="header-logo">
+                <img src="{{ url_for('static', filename='acm-w-logo.png') }}" alt="ACM-W Logo" class="header-logo">
+            </div>
+            <div class="header-title">
+                <h1><a href="{{ url_for('index') }}">SVCE ACM Chapter</a></h1>
+                <p>Blog Page</p>
+            </div>
+            <nav class="header-nav">
+                <a href="{{ url_for('index') }}">Home</a>
+                <a href="{{ url_for('admin_login') }}">Admin</a>
+            </nav>
+        </div>
+    </header>
+
+    <main class="main-content">
+        {% if get_flashed_messages() %}
+            <div class="flash-messages">
+                {% for category, message in get_flashed_messages(with_categories=true) %}
+                    <div class="flash-message flash-{{ category }}">
+                        <i class="fas fa-info-circle"></i>
+                        {{ message }}
+                    </div>
+                {% endfor %}
+            </div>
+        {% endif %}
+
+        {% block content %}{% endblock %}
+    </main>
+
+    <footer class="footer">
+        <div class="footer-container">
+            <div class="footer-content">
+                <div class="footer-logos">
+                    <img src="{{ url_for('static', filename='acm-logo.png') }}" alt="ACM Logo" class="footer-logo">
+                    <img src="{{ url_for('static', filename='acm-w-logo.png') }}" alt="ACM-W Logo" class="footer-logo">
+                </div>
+                <div class="footer-text">
+                    <p>&copy; 2025 SVCE ACM Chapter. All rights reserved.</p>
+                    <p>Follow us: <a href="https://www.instagram.com/svceacm/?hl=en" target="_blank" class="footer-link">
+                        <i class="fab fa-instagram"></i> @svceacm
+                    </a></p>
+                </div>
+            </div>
+        </div>
+    </footer>
+
+    <script src="{{ url_for('static', filename='js/editor.js') }}"></script>
+</body>
+</html>

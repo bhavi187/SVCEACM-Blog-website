@@ -1,0 +1,47 @@
+{% extends "base.html" %}
+
+{% block title %}Home - SVCE ACM Chapter Blog{% endblock %}
+
+{% block content %}
+<div class="container">
+    <header class="page-header">
+        <h1>Welcome to SVCE ACM Chapter's Blog Page</h1>
+        <p class="subtitle">Discover insights, events, and updates from our computing community</p>
+    </header>
+
+    <div class="blog-list">
+        {% if blogs %}
+            <h2>Latest Posts</h2>
+            {% for blog in blogs %}
+                <article class="blog-card">
+                    <div class="blog-card-content">
+                        <div style="display: flex; justify-content: space-between; align-items: center;">
+                            <h3 class="blog-title" style="margin: 0; flex: 1;">
+                                <a href="{{ url_for('view_blog', blog_id=blog.id) }}">{{ blog.title }}</a>
+                            </h3>
+                            <div class="blog-meta" style="margin-left: 1rem;">
+                                <i class="fas fa-calendar"></i>
+                                <time>{{ blog.created_at.strftime('%m/%d/%Y') }}</time>
+                            </div>
+                        </div>
+                        {% if blog.author %}
+                            <div class="blog-author">
+                                <i class="fas fa-user"></i> {{ blog.author }}
+                            </div>
+                        {% endif %}
+                        <div>
+                            <a href="{{ url_for('view_blog', blog_id=blog.id) }}" class="read-more">Read More</a>
+                        </div>
+                    </div>
+                </article>
+            {% endfor %}
+        {% else %}
+            <div class="empty-state">
+                <i class="fas fa-file-alt"></i>
+                <h2>No blogs available</h2>
+                <p>Check back later for new content!</p>
+            </div>
+        {% endif %}
+    </div>
+</div>
+{% endblock %}
