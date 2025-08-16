@@ -1,0 +1,185 @@
+{% extends "base.html" %}
+
+{% block title %}Admin Panel - Simple Blog{% endblock %}
+
+{% block content %}
+<div class="container">
+    {% if not logged_in %}
+        <!-- Login Form -->
+        <div class="admin-login">
+            <h1><i class="fas fa-lock"></i> Admin Login</h1>
+            <form method="POST" class="login-form">
+                <input type="hidden" name="action" value="login">
+                
+                <div class="form-group">
+                    <label for="keyname">Keyname:</label>
+                    <input type="text" id="keyname" name="keyname" required>
+                </div>
+                
+                <div class="form-group">
+                    <label for="password">Password:</label>
+                    <div class="password-input-wrapper">
+                        <input type="password" id="password" name="password" required>
+                        <button type="button" class="password-toggle" onclick="togglePassword('password')">
+                            <i class="fas fa-eye" id="password-eye"></i>
+                        </button>
+                    </div>
+                </div>
+                
+                <button type="submit" class="btn btn-primary">
+                    <i class="fas fa-sign-in-alt"></i> Login
+                </button>
+            </form>
+        </div>
+    {% else %}
+        <!-- Admin Dashboard -->
+        <div class="admin-dashboard">
+            <header class="admin-header">
+                <h1><i class="fas fa-tachometer-alt"></i> Admin Dashboard</h1>
+                <form method="POST" class="logout-form">
+                    <input type="hidden" name="action" value="logout">
+                    <button type="submit" class="btn btn-secondary">
+                        <i class="fas fa-sign-out-alt"></i> Logout
+                    </button>
+                </form>
+            </header>
+
+            <div class="admin-stats">
+                <div class="stat-card">
+                    <i class="fas fa-file-alt"></i>
+                    <div>
+                        <h3>{{ blog_count }}</h3>
+                        <p>Total Blogs</p>
+                    </div>
+                </div>
+                <div class="stat-card">
+                    <i class="fas fa-chart-line"></i>
+                    <div>
+                        <h3>{{ 5 - blog_count }}</h3>
+                        <p>Slots Remaining</p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Create New Blog -->
+            <section class="admin-section">
+                <h2><i class="fas fa-plus"></i> Create New Blog</h2>
+                {% if blog_count >= 5 %}
+                    <div class="warning-message">
+                        <i class="fas fa-exclamation-triangle"></i>
+                        Maximum blog limit reached (5/5). Delete a blog to create a new one.
+                    </div>
+                {% else %}
+                    <form method="POST" class="blog-form">
+                        <input type="hidden" name="action" value="create_blog">
+                        
+                        <div class="form-group">
+                            <label for="title">Blog Title:</label>
+                            <input type="text" id="title" name="title" required maxlength="200">
+                        </div>
+                        
+                        <div class="form-group">
+                            <label for="author">Author:</label>
+                            <input type="text" id="author" name="author" maxlength="100" placeholder="Enter author name (optional)">
+                        </div>
+                        
+                        <div class="form-group">
+                            <label for="content">Content:</label>
+                            <div class="editor-toolbar">
+                                <button type="button" onclick="formatText('bold')" class="toolbar-btn">
+                                    <i class="fas fa-bold"></i>
+                                </button>
+                                <button type="button" onclick="formatText('italic')" class="toolbar-btn">
+                                    <i class="fas fa-italic"></i>
+                                </button>
+                                <button type="button" onclick="formatText('underline')" class="toolbar-btn">
+                                    <i class="fas fa-underline"></i>
+                                </button>
+                                <select onchange="changeFontSize(this.value)" class="font-size-select">
+                                    <option value="">Font Size</option>
+                                    <option value="12px">Small</option>
+                                    <option value="16px">Medium</option>
+                                    <option value="20px">Large</option>
+                                    <option value="24px">X-Large</option>
+                                </select>
+                                <select onchange="changeFontFamily(this.value)" class="font-family-select">
+                                    <option value="">Font Type</option>
+                                    <option value="Arial">Arial</option>
+                                    <option value="Georgia">Georgia</option>
+                                    <option value="Times New Roman">Times New Roman</option>
+                                    <option value="Courier New">Courier New</option>
+                                </select>
+                                <button type="button" onclick="insertLink()" class="toolbar-btn">
+                                    <i class="fas fa-link"></i>
+                                </button>
+                                <button type="button" onclick="togglePreview()" class="toolbar-btn" id="previewToggle">
+                                    <i class="fas fa-eye"></i> Preview
+                                </button>
+                            </div>
+                            
+                            <div class="editor-container">
+                                <div id="editor" contenteditable="true" class="rich-editor"></div>
+                                <div id="preview" class="blog-preview" style="display: none;">
+                                    <div class="preview-header">
+                                        <h2 id="previewTitle">Blog Preview</h2>
+                                        <p class="preview-date">Preview Mode</p>
+                                    </div>
+                                    <div id="previewContent" class="preview-content"></div>
+                                </div>
+                            </div>
+                            
+                            <textarea id="content" name="content" style="display: none;"></textarea>
+                        </div>
+                        
+                        <button type="submit" class="btn btn-primary">
+                            <i class="fas fa-plus"></i> Create Blog
+                        </button>
+                    </form>
+                {% endif %}
+            </section>
+
+            <!-- Manage Existing Blogs -->
+            <section class="admin-section">
+                <h2><i class="fas fa-list"></i> Manage Blogs</h2>
+                {% if blogs %}
+                    <div class="blog-management">
+                        {% for blog in blogs %}
+                            <div class="blog-item">
+                                <div class="blog-item-info">
+                                    <h3>{{ blog.title }}</h3>
+                                    <p class="blog-date">{{ blog.created_at.strftime('%B %d, %Y') }}</p>
+                                </div>
+                                <div class="blog-item-actions">
+                                    <a href="{{ url_for('view_blog', blog_id=blog.id) }}" class="btn btn-small">
+                                        <i class="fas fa-eye"></i> View
+                                    </a>
+                                    {% if blog_count > 1 %}
+                                        <form method="POST" style="display: inline;" onsubmit="return confirm('Are you sure you want to delete the blog &quot;{{ blog.title }}&quot;?\n\nThis action cannot be undone.')">
+                                            <input type="hidden" name="action" value="delete_blog">
+                                            <input type="hidden" name="blog_id" value="{{ blog.id }}">
+                                            <button type="submit" class="btn btn-danger btn-small">
+                                                <i class="fas fa-trash"></i> Delete
+                                            </button>
+                                        </form>
+                                    {% else %}
+                                        <button class="btn btn-danger btn-small" disabled title="Cannot delete the last blog">
+                                            <i class="fas fa-trash"></i> Delete
+                                        </button>
+                                    {% endif %}
+                                </div>
+                            </div>
+                        {% endfor %}
+                    </div>
+                {% else %}
+                    <div class="empty-state">
+                        <i class="fas fa-file-alt"></i>
+                        <p>No blogs created yet.</p>
+                    </div>
+                {% endif %}
+            </section>
+
+
+        </div>
+    {% endif %}
+</div>
+{% endblock %}
